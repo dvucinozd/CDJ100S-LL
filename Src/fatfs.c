@@ -1,46 +1,47 @@
 /**
-  ******************************************************************************
-  * @file   fatfs.c
-  * @brief  Code for fatfs applications
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file   fatfs.c
+ * @brief  Code for fatfs applications - USB Host version
+ ******************************************************************************
+ */
 
 #include "fatfs.h"
 
-uint8_t retSD;    /* Return value for SD */
-char SDPath[4];   /* SD logical drive path */
-FATFS SDFatFS;    /* File system object for SD logical drive */
-FIL SDFile;       /* File object for SD */
+uint8_t retUSB;  /* Return value for USB */
+char USBPath[4]; /* USB logical drive path */
+FATFS USBFatFS;  /* File system object for USB logical drive */
+FIL USBFile;     /* File object for USB */
 
 /* USER CODE BEGIN Variables */
 #include "diskio.h"
 #include "ff.h"
+#include "usbh_diskio.h"
 
-/* USER CODE END Variables */    
+/* USER CODE END Variables */
 
-void MX_FATFS_Init(void) 
-{
-  /*## FatFS: Link the SD driver ###########################*/
-  retSD = FATFS_LinkDriver(&SD_Driver, SDPath);
+void MX_FATFS_Init(void) {
+  /*## FatFS: Link the USB Host driver ###########################*/
+  retUSB = FATFS_LinkDriver(&USBH_Driver, USBPath);
 
   /* USER CODE BEGIN Init */
-  /* additional user code for init */     
+  /* additional user code for init */
   /* USER CODE END Init */
 }
 
+/**
+ * @brief  Gets Drive Path for USB
+ * @retval Pointer to USB path string
+ */
+char *FATFS_GetUSBPath(void) { return USBPath; }
+
 /* USER CODE BEGIN Application */
-     
+
+/* USER CODE END Application */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+/* USER CODE BEGIN Application */
+
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
