@@ -32,6 +32,9 @@ extern "C" {
 #define USBH_MAX_SIZE_CONFIGURATION 256
 #define USBH_MAX_DATA_BUFFER 512
 
+/* USB Host ID */
+#define HOST_FS 0
+
 /* Memory management - use standard malloc/free */
 #define USBH_malloc malloc
 #define USBH_free free

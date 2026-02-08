@@ -1,0 +1,183 @@
+Processing disco_f746ng (platform: ststm32; board: disco_f746ng)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/disco_f746ng.html
+PLATFORM: ST STM32 (19.4.0) > ST 32F746GDISCOVERY
+HARDWARE: STM32F746NGH6 216MHz, 320KB RAM, 1MB Flash
+DEBUG: Current (stlink) On-board (stlink) External (blackmagic, cmsis-dap, jlink)
+PACKAGES: 
+ - toolchain-gccarmnoneeabi @ 1.70201.0 (7.2.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 0 compatible libraries
+Scanning dependencies...
+No dependencies
+Building in release mode
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_cortex.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_dma.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_dma2d.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_dma_ex.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_dsi.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_exti.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_flash.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_flash_ex.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_gpio.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_hcd.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_i2c.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_i2c_ex.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_ltdc.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_ltdc_ex.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_pwr.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_pwr_ex.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_rcc.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_rcc_ex.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_sai.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_sai_ex.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_sd.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_sdram.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_spi.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_spi_ex.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_tim.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_hal_tim_ex.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_ll_fmc.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_ll_sdmmc.o
+Compiling .pio\build\disco_f746ng\src\Drivers\STM32F7xx_HAL_Driver\Src\stm32f7xx_ll_usb.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\ST\STM32_USB_Host_Library\Class\MSC\Src\usbh_msc.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\ST\STM32_USB_Host_Library\Class\MSC\Src\usbh_msc_bot.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\ST\STM32_USB_Host_Library\Class\MSC\Src\usbh_msc_scsi.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\ST\STM32_USB_Host_Library\Core\Src\usbh_core.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\ST\STM32_USB_Host_Library\Core\Src\usbh_ctlreq.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\ST\STM32_USB_Host_Library\Core\Src\usbh_ioreq.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\ST\STM32_USB_Host_Library\Core\Src\usbh_pipes.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\FatFs\src\diskio.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\FatFs\src\ff.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\FatFs\src\ff_gen_drv.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\FatFs\src\option\ccsbcs.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\FatFs\src\option\syscall.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\mp3dec.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\mp3tabs.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\bitstream.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\buffers.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\dct32.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\dequant.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\dqchan.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\huffman.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\hufftabs.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\imdct.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\polyphase.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\scalfact.o
+Middlewares\Third_Party\Helix\real\huffman.c: In function 'xmp3fixpt_DecodeHuffman':
+Middlewares\Third_Party\Helix\real\huffman.c:386:19: warning: variable 'sfi' set but not used [-Wunused-but-set-variable]
+  ScaleFactorInfo *sfi;
+                   ^~~
+Middlewares\Third_Party\Helix\real\dqchan.c: In function 'xmp3fixpt_DequantChannel':
+Middlewares\Third_Party\Helix\real\dqchan.c:248:6: warning: variable 'cbStartL' set but not used [-Wunused-but-set-variable]
+  int cbStartL, cbEndL, cbStartS, cbEndS;
+      ^~~~~~~~
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\stproc.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\subband.o
+Compiling .pio\build\disco_f746ng\src\Middlewares\Third_Party\Helix\real\trigtabs_fixpt.o
+Compiling .pio\build\disco_f746ng\src\Src\bsp_driver_sd.o
+Compiling .pio\build\disco_f746ng\src\Src\display.o
+Compiling .pio\build\disco_f746ng\src\Src\dma.o
+Compiling .pio\build\disco_f746ng\src\Src\dma2d.o
+Middlewares\Third_Party\Helix\real\subband.c: In function 'xmp3fixpt_Subband':
+Middlewares\Third_Party\Helix\real\subband.c:63:15: warning: variable 'hi' set but not used [-Wunused-but-set-variable]
+  HuffmanInfo *hi;
+               ^~
+Middlewares\Third_Party\Helix\real\scalfact.c: In function 'UnpackSFMPEG2':
+Middlewares\Third_Party\Helix\real\scalfact.c:211:36: warning: variable 'iipTest' set but not used [-Wunused-but-set-variable]
+  int i, sfb, sfcIdx, btIdx, nrIdx, iipTest;
+                                    ^~~~~~~
+Compiling .pio\build\disco_f746ng\src\Src\fatfs.o
+Compiling .pio\build\disco_f746ng\src\Src\fatfs_platform.o
+Compiling .pio\build\disco_f746ng\src\Src\fmc.o
+Compiling .pio\build\disco_f746ng\src\Src\ft5336.o
+Compiling .pio\build\disco_f746ng\src\Src\gpio.o
+Compiling .pio\build\disco_f746ng\src\Src\i2c.o
+Src\bsp_driver_sd.c: In function 'HAL_SD_AbortCallback':
+Src\bsp_driver_sd.c:229:3: warning: implicit declaration of function 'BSP_SD_AbortCallback'; did you mean 'HAL_SD_AbortCallback'? [-Wimplicit-function-declaration]
+   BSP_SD_AbortCallback();
+   ^~~~~~~~~~~~~~~~~~~~
+   HAL_SD_AbortCallback
+Src\bsp_driver_sd.c: In function 'HAL_SD_TxCpltCallback':
+Src\bsp_driver_sd.c:239:3: warning: implicit declaration of function 'BSP_SD_WriteCpltCallback'; did you mean 'BSP_SD_DetectCallback'? [-Wimplicit-function-declaration]
+   BSP_SD_WriteCpltCallback();
+   ^~~~~~~~~~~~~~~~~~~~~~~~
+   BSP_SD_DetectCallback
+Src\bsp_driver_sd.c: In function 'HAL_SD_RxCpltCallback':
+Src\bsp_driver_sd.c:249:3: warning: implicit declaration of function 'BSP_SD_ReadCpltCallback'; did you mean 'BSP_SD_DetectCallback'? [-Wimplicit-function-declaration]
+Compiling .pio\build\disco_f746ng\src\Src\ltdc.o
+   BSP_SD_ReadCpltCallback();
+   ^~~~~~~~~~~~~~~~~~~~~~~
+   BSP_SD_DetectCallback
+Src\bsp_driver_sd.c: At top level:
+Src\bsp_driver_sd.c:257:13: warning: conflicting types for 'BSP_SD_AbortCallback'
+ __weak void BSP_SD_AbortCallback(void)
+             ^~~~~~~~~~~~~~~~~~~~
+Src\bsp_driver_sd.c:229:3: note: previous implicit declaration of 'BSP_SD_AbortCallback' was here
+   BSP_SD_AbortCallback();
+   ^~~~~~~~~~~~~~~~~~~~
+Src\bsp_driver_sd.c:266:13: warning: conflicting types for 'BSP_SD_WriteCpltCallback'
+ __weak void BSP_SD_WriteCpltCallback(void)
+             ^~~~~~~~~~~~~~~~~~~~~~~~
+Src\bsp_driver_sd.c:239:3: note: previous implicit declaration of 'BSP_SD_WriteCpltCallback' was here
+   BSP_SD_WriteCpltCallback();
+   ^~~~~~~~~~~~~~~~~~~~~~~~
+Src\bsp_driver_sd.c:275:13: warning: conflicting types for 'BSP_SD_ReadCpltCallback'
+ __weak void BSP_SD_ReadCpltCallback(void)
+             ^~~~~~~~~~~~~~~~~~~~~~~
+Src\bsp_driver_sd.c:249:3: note: previous implicit declaration of 'BSP_SD_ReadCpltCallback' was here
+   BSP_SD_ReadCpltCallback();
+   ^~~~~~~~~~~~~~~~~~~~~~~
+Compiling .pio\build\disco_f746ng\src\Src\main.o
+Compiling .pio\build\disco_f746ng\src\Src\mp3player.o
+Compiling .pio\build\disco_f746ng\src\Src\rekordbox.o
+Compiling .pio\build\disco_f746ng\src\Src\sai.o
+Compiling .pio\build\disco_f746ng\src\Src\sd_diskio.o
+Compiling .pio\build\disco_f746ng\src\Src\sdmmc.o
+Compiling .pio\build\disco_f746ng\src\Src\spi.o
+Compiling .pio\build\disco_f746ng\src\Src\stm32746g_discovery_audio.o
+Compiling .pio\build\disco_f746ng\src\Src\stm32746g_discovery_ts.o
+Compiling .pio\build\disco_f746ng\src\Src\stm32f7xx_hal_msp.o
+Compiling .pio\build\disco_f746ng\src\Src\stm32f7xx_it.o
+Compiling .pio\build\disco_f746ng\src\Src\sys.o
+Compiling .pio\build\disco_f746ng\src\Src\syscalls.o
+Compiling .pio\build\disco_f746ng\src\Src\system_stm32f7xx.o
+Src\rekordbox.c:66:16: warning: 'GetBigEndianLongNumber' defined but not used [-Wunused-function]
+ static int32_t GetBigEndianLongNumber () {
+                ^~~~~~~~~~~~~~~~~~~~~~
+Src\stm32746g_discovery_audio.c: In function 'Mp3FillReadBuffer':
+Src\stm32746g_discovery_audio.c:1467:6: warning: 'memset' used with constant zero length parameter; this could be due to transposed parameters [-Wmemset-transposed-args]
+      memset(BufferCtl.buff + unInDataLeft + unRead, unSpaceLeft - unRead, 0);
+      ^~~~~~
+Compiling .pio\build\disco_f746ng\src\Src\tim.o
+Compiling .pio\build\disco_f746ng\src\Src\usb_host.o
+Compiling .pio\build\disco_f746ng\src\Src\usbh_conf.o
+Compiling .pio\build\disco_f746ng\src\Src\usbh_diskio.o
+Compiling .pio\build\disco_f746ng\src\Src\waveplayer.o
+Compiling .pio\build\disco_f746ng\src\Src\wm8994.o
+Compiling .pio\build\disco_f746ng\src\startup\startup_stm32f746xx.o
+Src\usb_host.c: In function 'MX_USB_HOST_Init':
+Src\usb_host.c:27:5: warning: implicit declaration of function 'Error_Handler' [-Wimplicit-function-declaration]
+     Error_Handler();
+     ^~~~~~~~~~~~~
+Linking .pio\build\disco_f746ng\firmware.elf
+Checking size .pio\build\disco_f746ng\firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [===       ]  31.7% (used 103968 bytes from 327680 bytes)
+Flash: [=         ]  12.2% (used 128172 bytes from 1048576 bytes)
+Building .pio\build\disco_f746ng\firmware.bin
+========================= [SUCCESS] Took 4.77 seconds =========================
+
+********************************************************************************
+There is a new version 6.1.19 of PlatformIO available.
+Please upgrade it via `platformio upgrade` or `python -m pip install -U platformio` command.
+Changes: https://docs.platformio.org/en/latest/history.html
+********************************************************************************
+
+
+********************************************************************************
+We found 1.36GB of unnecessary PlatformIO system data (temporary files, unnecessary packages, etc.).
+Use `pio system prune --dry-run` to list them or `pio system prune` to save disk space.
