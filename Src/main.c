@@ -58,7 +58,6 @@
 #include "i2c.h"
 #include "ltdc.h"
 #include "sai.h"
-#include "sdmmc.h"
 #include "spi.h"
 #include "tim.h"
 
@@ -201,7 +200,6 @@ int main(void) {
   MX_DMA_Init();
   MX_LTDC_Init();
   MX_FMC_Init();
-  MX_SDMMC1_SD_Init(); // Keep for compatibility, but not used
   MX_USB_HOST_Init();  // Initialize USB Host
   MX_FATFS_Init();
   MX_DMA2D_Init();
@@ -359,7 +357,7 @@ void SystemClock_Config(void) {
   }
   PeriphClkInitStruct.PeriphClockSelection =
       RCC_PERIPHCLK_LTDC | RCC_PERIPHCLK_SAI2 | RCC_PERIPHCLK_I2C3 |
-      RCC_PERIPHCLK_SDMMC1 | RCC_PERIPHCLK_CLK48;
+      RCC_PERIPHCLK_CLK48;
   PeriphClkInitStruct.PLLI2S.PLLI2SN = 100;
   PeriphClkInitStruct.PLLI2S.PLLI2SP = RCC_PLLP_DIV2;
   PeriphClkInitStruct.PLLI2S.PLLI2SR = 2;
@@ -374,7 +372,6 @@ void SystemClock_Config(void) {
   PeriphClkInitStruct.Sai2ClockSelection = RCC_SAI2CLKSOURCE_PLLI2S;
   PeriphClkInitStruct.I2c3ClockSelection = RCC_I2C3CLKSOURCE_PCLK1;
   PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLLSAIP;
-  PeriphClkInitStruct.Sdmmc1ClockSelection = RCC_SDMMC1CLKSOURCE_CLK48;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK) {
     Error_Handler();
   }
