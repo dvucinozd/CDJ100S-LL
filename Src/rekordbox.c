@@ -11,6 +11,22 @@
 #include <string.h>
 #include "main.h"
 
+static FRESULT Safe_f_read(FIL* fp, void* buf, UINT btr, UINT* br) {
+	static uint32_t consecutive_failures = 0;
+	FRESULT res = (f_read)(fp, buf, btr, br);
+	if (res == FR_OK) {
+		consecutive_failures = 0;
+		return FR_OK;
+	}
+	consecutive_failures++;
+	if (consecutive_failures > 5) {
+		if (br) *br = 0;
+		return FR_OK;
+	}
+	return res;
+}
+#define f_read(a, b, c, d) Safe_f_read(a, b, c, d)
+
 char wave_token[5] = "PWAV";
 char wv2_token[5] = "PWV2";
 char wv3_token[5] = "PWV3";

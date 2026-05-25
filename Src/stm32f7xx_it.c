@@ -80,6 +80,10 @@
 #include "waveplayer.h"
 
 
+volatile SPI_EventTypeDef spi_event_queue[SPI_EVENT_QUEUE_SIZE];
+volatile uint8_t spi_event_in = 0;
+volatile uint8_t spi_event_out = 0;
+
 extern UINT bOutOfData;
 extern UINT unInDataLeft;
 extern uint32_t unDmaBufMode;
@@ -618,6 +622,29 @@ void DMA2_Stream4_IRQHandler(void) {
 
 /* USER CODE BEGIN 1 */
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
+  if (spi_rx[0] != 0 || spi_rx[1] != 0 || spi_rx[2] != 0 || spi_rx[3] != 0) {
+    uint8_t next_in = (spi_event_in + 1) % SPI_EVENT_QUEUE_SIZE;
+    if (next_in != spi_event_out) {
+      spi_event_queue[spi_event_in].rx_bytes[0] = spi_rx[0];
+      spi_event_queue[spi_event_in].rx_bytes[1] = spi_rx[1];
+      spi_event_queue[spi_event_in].rx_bytes[2] = spi_rx[2];
+      spi_event_queue[spi_event_in].rx_bytes[3] = spi_rx[3];
+      spi_event_in = next_in;
+    }
+  }
+  for (int i = 0; i < 4; i++)
+    spi_rx[i] = 0;
+  HAL_SPI_TransmitReceive_IT(&hspi2, spi_tx, spi_rx, 4);
+}
+
+void ProcessPendingSPIEvents(void) {
+  while (spi_event_out != spi_event_in) {
+    uint8_t spi_rx_temp[4];
+    spi_rx_temp[0] = spi_event_queue[spi_event_out].rx_bytes[0];
+    spi_rx_temp[1] = spi_event_queue[spi_event_out].rx_bytes[1];
+    spi_rx_temp[2] = spi_event_queue[spi_event_out].rx_bytes[2];
+    spi_rx_temp[3] = spi_event_queue[spi_event_out].rx_bytes[3];
+    uint8_t *spi_rx = spi_rx_temp;
   switch (spi_rx[1] & 0xF0) {
   case 0x90: {
     switch (spi_rx[2]) {
@@ -996,9 +1023,8 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
   default:
     break;
   }
-  for (int i = 0; i < 4; i++)
-    spi_rx[i] = 0;
-  HAL_SPI_TransmitReceive_IT(&hspi2, spi_tx, spi_rx, 4);
+    spi_event_out = (spi_event_out + 1) % SPI_EVENT_QUEUE_SIZE;
+  }
 }
 
 /**

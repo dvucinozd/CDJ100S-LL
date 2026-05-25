@@ -1,7 +1,7 @@
 /*
  * player.c
  *
- *  Created on: 10 ���. 2018 �.
+ *  Created on: 10 . 2018 .
  *      Author: teren
  */
 
@@ -96,7 +96,10 @@ void PlayWavFile() {
 	else trak.bitrate = AUDIO_FREQUENCY_44K;
 	BSP_AUDIO_OUT_ClockConfig(&hsai_BlockA2, (uint32_t)(trak.bitrate / 2)*(1 + trak.percent), NULL);
 	/* Fill whole buffer at first time */
-	while(f_read(&MyFile, &BufferCtl.buff[0], 2048, (void *)&bytesread) != FR_OK);
+	if(f_read(&MyFile, &BufferCtl.buff[0], 2048, (void *)&bytesread) != FR_OK || bytesread == 0) {
+		bOutOfData = 1;
+		return;
+	}
 	if(bytesread != 0) {
 		BSP_AUDIO_OUT_Play((uint16_t*)&BufferCtl.buff[0], AUDIO_OUT_BUFFER_SIZE);
 		BufferCtl.fptr = bytesread;
@@ -111,6 +114,7 @@ void PlayWavFile() {
 	}
 	while((!bOutOfData) && (file_pos_wide < rekordbox.spectrum_size)) {
 		ProcessPendingTouch();
+		ProcessPendingSPIEvents();
 		if(file_pos_wide >= 0) {
 			if((rmin == 0) && (rsec < 30) && (rsec > 10)) {
 				if(tim7_flag == 0) {

@@ -254,6 +254,7 @@ int main(void) {
   /* USER CODE BEGIN WHILE */
   while (1) {
     ProcessPendingTouch();
+    ProcessPendingSPIEvents();
     find_file(Track_number);
     fr = 0;
     sec = 0;

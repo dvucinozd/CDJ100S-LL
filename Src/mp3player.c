@@ -1,7 +1,7 @@
 /*
  * mp3player.c
  *
- *  Created on: 12 ���. 2018 �.
+ *  Created on: 12 . 2018 .
  *      Author: teren
  */
 
@@ -223,7 +223,8 @@ uint8_t ReadMp3Header(Mp3HeaderTypeDef *mp3format) {
 	uint16_t readbuffer;
 	FRESULT res;
 	do {
-		while(f_read(&MyFile, &readbuffer, 2, (void *)&bytesread) != FR_OK);
+		res = f_read(&MyFile, &readbuffer, 2, (void *)&bytesread);
+		if(res != FR_OK || bytesread == 0) return 1;
 		if((readbuffer & 0xFFF0) == 0xFFF0) break;
 		f_lseek(&MyFile, -1);
 	}
@@ -321,7 +322,6 @@ void PlayMp3File() {
 	Mp3ReadId3V2Tag(&MyFile, szArtist, sizeof(szArtist), szTitle, sizeof(szTitle));
 	bOutOfData = 0;
 	memset(BufferCtl.buff, 0, AUDIO_OUT_BUFFER_SIZE);
-	//memset(g_pMp3DmaBuffer, 0, MP3_DMA_BUFFER_SIZE);
 	g_pMp3DmaBufferPtr = g_pMp3DmaBuffer;
 	unInDataLeft = 0;
 	unDmaBufferSpace = 0;
@@ -330,6 +330,7 @@ void PlayMp3File() {
 	unDmaBufMode = 0;
 	do {
 		ProcessPendingTouch();
+		ProcessPendingSPIEvents();
 		// fill the whole buffer for the first time
 		if(unInDataLeft < (2 * MAINBUF_SIZE)) {
 			UINT unRead = Mp3FillReadBuffer(pInData, unInDataLeft, &MyFile);
@@ -340,8 +341,6 @@ void PlayMp3File() {
 		int nOffset = MP3FindSyncWord(pInData, unInDataLeft);
 		if(nOffset < 0) {
 			unInDataLeft = 0;
-			//bOutOfData = 1;
-			//break;
 		}
 		else {
 			pInData += nOffset;
@@ -404,6 +403,7 @@ void PlayMp3File() {
 						// we must wait for the dma stream tx interrupt here
 						while(unDmaBufMode == 0) {
 							ProcessPendingTouch();
+							ProcessPendingSPIEvents();
 						}
 					}
 				}
@@ -417,7 +417,6 @@ void PlayMp3File() {
 			case ERR_MP3_INDATA_UNDERFLOW:
 			{
 				if(nOffset == 0)
-				// something's really wrong here, frame had to fit
 					bOutOfData = 1;
 				else {
 					unInDataLeft = 0;
@@ -454,6 +453,7 @@ void RereadMp3File()
 	unDmaBufMode = 0;
 	do {
 		ProcessPendingTouch();
+		ProcessPendingSPIEvents();
 		// fill the whole buffer for the first time
 		if(unInDataLeft < (2 * MAINBUF_SIZE)) {
 			UINT unRead = Mp3FillReadBuffer(pInData, unInDataLeft, &MyFile);
@@ -464,8 +464,6 @@ void RereadMp3File()
 		int nOffset = MP3FindSyncWord(pInData, unInDataLeft);
 		if(nOffset < 0) {
 			unInDataLeft = 0;
-			//bOutOfData = 1;
-			//break;
 		}
 		else {
 			pInData += nOffset;
@@ -528,6 +526,7 @@ void RereadMp3File()
 						// we must wait for the dma stream tx interrupt here
 						while(unDmaBufMode == 0) {
 							ProcessPendingTouch();
+							ProcessPendingSPIEvents();
 						}
 					}
 				}
@@ -542,12 +541,7 @@ void RereadMp3File()
 			}
 			case ERR_MP3_INDATA_UNDERFLOW:
 			{
-				//if(nOffset == 0)
-				// something's really wrong here, frame had to fit
-				//bOutOfData = 1;
-				//else {
 				unInDataLeft = 0;
-				//}
 				break;
 			}
 			default:

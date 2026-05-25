@@ -43,6 +43,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdint.h>
 #define HOLD			0x40
 #define TIME			0x41
 #define EJECT			0x42
@@ -101,6 +102,12 @@ void TIM6_DAC_IRQHandler(void);
 void TIM7_IRQHandler(void);
 void DMA2_Stream4_IRQHandler(void);
 /* USER CODE BEGIN EFP */
+#define SPI_EVENT_QUEUE_SIZE 16
+typedef struct {
+    uint8_t rx_bytes[4];
+} SPI_EventTypeDef;
+
+void ProcessPendingSPIEvents(void);
 void ProcessPendingTouch(void);
 
 /* USER CODE END EFP */

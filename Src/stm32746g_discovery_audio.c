@@ -105,6 +105,22 @@
 #include "waveplayer.h"
 #include "mp3player.h"
 #include "tim.h"
+
+static FRESULT Safe_f_read(FIL* fp, void* buf, UINT btr, UINT* br) {
+	static uint32_t consecutive_failures = 0;
+	FRESULT res = (f_read)(fp, buf, btr, br);
+	if (res == FR_OK) {
+		consecutive_failures = 0;
+		return FR_OK;
+	}
+	consecutive_failures++;
+	if (consecutive_failures > 5) {
+		if (br) *br = 0;
+		return FR_OK;
+	}
+	return res;
+}
+#define f_read(a, b, c, d) Safe_f_read(a, b, c, d)
 /** @addtogroup BSP
   * @{
   */
