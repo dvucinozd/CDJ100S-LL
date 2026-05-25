@@ -16,6 +16,7 @@
 #include "display.h"
 #include "tim.h"
 #include "main.h"
+#include "stm32f7xx_it.h"
 
 extern FIL MyFile;
 extern AUDIO_OUT_BufferTypeDef BufferCtl;
@@ -328,6 +329,7 @@ void PlayMp3File() {
 	nDecodeRes = ERR_MP3_INDATA_UNDERFLOW;
 	unDmaBufMode = 0;
 	do {
+		ProcessPendingTouch();
 		// fill the whole buffer for the first time
 		if(unInDataLeft < (2 * MAINBUF_SIZE)) {
 			UINT unRead = Mp3FillReadBuffer(pInData, unInDataLeft, &MyFile);
@@ -400,7 +402,9 @@ void PlayMp3File() {
 							}
 						}
 						// we must wait for the dma stream tx interrupt here
-						while(unDmaBufMode == 0);
+						while(unDmaBufMode == 0) {
+							ProcessPendingTouch();
+						}
 					}
 				}
 				break;
@@ -449,6 +453,7 @@ void RereadMp3File()
 	nDecodeRes = ERR_MP3_INDATA_UNDERFLOW;
 	unDmaBufMode = 0;
 	do {
+		ProcessPendingTouch();
 		// fill the whole buffer for the first time
 		if(unInDataLeft < (2 * MAINBUF_SIZE)) {
 			UINT unRead = Mp3FillReadBuffer(pInData, unInDataLeft, &MyFile);
@@ -521,7 +526,9 @@ void RereadMp3File()
 							}
 						}
 						// we must wait for the dma stream tx interrupt here
-						while(unDmaBufMode == 0);
+						while(unDmaBufMode == 0) {
+							ProcessPendingTouch();
+						}
 					}
 				}
 				break;

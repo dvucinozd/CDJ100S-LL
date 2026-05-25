@@ -76,6 +76,7 @@
 #include "spi.h"
 #include "stm32746g_discovery_audio.h"
 #include "stm32746g_discovery_ts.h"
+#include "tim.h"
 #include "waveplayer.h"
 
 
@@ -92,6 +93,8 @@ extern WavHeaderTypeDef wavfile;
 
 uint8_t flag = 0;
 uint8_t touch_count = 0;
+static volatile uint8_t touch_pending = 0;
+static TS_StateTypeDef pending_touch_state;
 extern int8_t menu_mode;
 float touch_wide = 0;
 uint16_t prev_x = 0;
@@ -116,8 +119,162 @@ extern uint32_t wavtagsize;
 extern uint32_t id3tagsize;
 extern uint8_t volume;
 extern uint8_t acue_sensitivity;
+extern float jog_sensitivity;
 
 float scale_pitch = 1;
+
+static void ProcessTouchState(const TS_StateTypeDef *touch_state) {
+  if (touch_state->touchDetected == 1) {
+    uint16_t touch_x = touch_state->touchX[0];
+    uint16_t touch_y = touch_state->touchY[0];
+
+    if ((touch_x > 40) && (touch_x < 440) && (touch_y > 220) &&
+        (touch_y < 260)) {
+      touch_count = 0;
+      if (rekordbox.lowp_spectrum_size != 0) {
+        GoToPosition(((float)touch_x - 40) * (float)rekordbox.spectrum_size /
+                     rekordbox.lowp_spectrum_size);
+      }
+      if (trak.state == PLAYING)
+        BSP_AUDIO_OUT_Resume();
+      else {
+        GetTrackTime();
+        if (spi_tx[2] & (1 << 0))
+          spi_tx[2] |= (1 << 1);
+        else
+          spi_tx[2] &= ~(1 << 1);
+        trak.state = SETCUE;
+      }
+    } else if ((touch_y > 20) && (touch_y < 165)) {
+      if (menu_mode == 0) {
+        if ((touch_y > 75) && (touch_y < 165)) {
+          HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+          __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
+          __HAL_TIM_SET_COUNTER(&htim6, 0);
+          HAL_TIM_Base_Start_IT(&htim6);
+          touch_count = 0;
+          if (touch_x > 280) {
+            if (stretch > 1)
+              stretch--;
+            else
+              stretch /= 2;
+            if (stretch < 0.1)
+              stretch = 0.125;
+          } else if (touch_x < 200) {
+            if (stretch >= 1)
+              stretch++;
+            else
+              stretch *= 2;
+            if (stretch > 4)
+              stretch = 4;
+          } else
+            stretch = 1;
+        }
+      }
+      if (menu_mode == 1) {
+        if (touch_count == 0) {
+          str_offset = 0;
+          prev_x = touch_x;
+          String_number = touch_y / 20 - 1;
+          Mark_number = String_number;
+          __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
+          __HAL_TIM_SET_COUNTER(&htim6, 0);
+          HAL_TIM_Base_Start_IT(&htim6);
+        } else {
+          __HAL_TIM_SET_COUNTER(&htim6, 0);
+          str_offset = touch_x - prev_x;
+        }
+        touch_count++;
+        if ((String_number != touch_y / 20 - 1)) {
+          if (Total_tracks > 7) {
+            if (String_number > (touch_y / 20 - 1)) {
+              str_increment += abs((touch_y / 20 - 1) - String_number);
+              if (str_increment > Total_tracks - 7)
+                str_increment = Total_tracks - 7;
+            } else {
+              str_increment -= abs((touch_y / 20 - 1) - String_number);
+              if (str_increment < 0)
+                str_increment = 0;
+            }
+          }
+          str_offset = 0;
+          touch_count = 0;
+          String_number = -1;
+        }
+        if (touch_x > 380) {
+          str_offset = 0;
+          touch_count = 0;
+          bOutOfData = 1;
+          unDmaBufMode = 3;
+          Track_number = String_number + str_increment;
+          if (Track_number >= Total_tracks)
+            Track_number = 0;
+          String_number = -1;
+        }
+      }
+      if (menu_mode == 2) {
+        touch_count = 0;
+        if ((touch_x >= 40) && (touch_x <= 440)) {
+          if ((touch_y > 40) && (touch_y < 60)) {
+            volume = 100 * (float)(touch_x - 40) / 400;
+            BSP_AUDIO_OUT_SetVolume(volume);
+          }
+          if ((touch_y > 80) && (touch_y < 100)) {
+            jog_sensitivity = 0.01 * (float)(touch_x - 40) / 400;
+          }
+          if ((touch_y > 120) && (touch_y < 140)) {
+            acue_sensitivity = 250 * (float)(touch_x - 40) / 400;
+          }
+        }
+      }
+    } else if ((touch_y > 0) && (touch_y < 20)) {
+      HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+      __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
+      __HAL_TIM_SET_COUNTER(&htim6, 0);
+      HAL_TIM_Base_Start_IT(&htim6);
+      touch_count = 0;
+      if (touch_x < 200) {
+        menu_mode--;
+        if (menu_mode < 0)
+          menu_mode = 2;
+      } else if (touch_x > 280) {
+        menu_mode++;
+        if (menu_mode > 2)
+          menu_mode = 0;
+      }
+    } else if ((touch_x > 80) && (touch_x < 280) && (touch_y > 180) &&
+               (touch_y < 210)) {
+      HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+      __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
+      __HAL_TIM_SET_COUNTER(&htim6, 0);
+      HAL_TIM_Base_Start_IT(&htim6);
+      touch_count = 0;
+      if (display.timemode == 0) {
+        display.timemode = 1;
+        display.trackbarmode = 1;
+      } else {
+        display.timemode = 0;
+        display.trackbarmode = 0;
+      }
+    } else {
+      touch_count = 0;
+    }
+  }
+}
+
+void ProcessPendingTouch(void) {
+  TS_StateTypeDef touch_state;
+
+  if (touch_pending == 0)
+    return;
+
+  HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+  touch_state = pending_touch_state;
+  touch_pending = 0;
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+  ProcessTouchState(&touch_state);
+}
 int pulses = 0; // jog pulses counter
 int old_pulses = 0;
 float jog_sensitivity = 0.003; // jog sensitivity; must be 0.005 ... 0.01
@@ -357,154 +514,10 @@ void SPI2_IRQHandler(void) {
 void EXTI15_10_IRQHandler(void) {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
   BSP_TS_GetState(&ts_State);
-  if (ts_State.touchDetected == 1) {
-    if ((ts_State.touchX[0] > 40) && (ts_State.touchX[0] < 440) &&
-        (ts_State.touchY[0] > 220) && (ts_State.touchY[0] < 260)) {
-      touch_count = 0;
-      GoToPosition(((float)ts_State.touchX[0] - 40) *
-                   (float)rekordbox.spectrum_size /
-                   rekordbox.lowp_spectrum_size);
-      if (trak.state == PLAYING)
-        BSP_AUDIO_OUT_Resume();
-      else {
-        GetTrackTime();
-        if (spi_tx[2] & (1 << 0))
-          spi_tx[2] |= (1 << 1);
-        else
-          spi_tx[2] &= ~(1 << 1);
-        trak.state = SETCUE;
-      }
-    } else if ((ts_State.touchY[0] > 20) && (ts_State.touchY[0] < 165)) {
-      if (menu_mode == 0) {
-        if ((ts_State.touchY[0] > 75) && (ts_State.touchY[0] < 165)) {
-          HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
-          __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
-          __HAL_TIM_SET_COUNTER(&htim6, 0);
-          HAL_TIM_Base_Start_IT(&htim6);
-          touch_count = 0;
-          if (ts_State.touchX[0] > 280) {
-            if (stretch > 1)
-              stretch--;
-            else
-              stretch /= 2;
-            if (stretch < 0.1)
-              stretch = 0.125;
-          } else if (ts_State.touchX[0] < 200) {
-            if (stretch >= 1)
-              stretch++;
-            else
-              stretch *= 2;
-            if (stretch > 4)
-              stretch = 4;
-          } else
-            stretch = 1;
-        }
-      }
-      if (menu_mode == 1) {
-        if (touch_count == 0) {
-          str_offset = 0;
-          prev_x = ts_State.touchX[0];
-          String_number = ts_State.touchY[0] / 20 - 1;
-          Mark_number = String_number;
-          __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
-          __HAL_TIM_SET_COUNTER(&htim6, 0);
-          HAL_TIM_Base_Start_IT(&htim6);
-        } else {
-          __HAL_TIM_SET_COUNTER(&htim6, 0);
-          str_offset = ts_State.touchX[0] - prev_x;
-        }
-        touch_count++;
-        if ((String_number != ts_State.touchY[0] / 20 - 1)) {
-          if (Total_tracks > 7) {
-            if (String_number > (ts_State.touchY[0] / 20 - 1)) {
-              str_increment +=
-                  abs((ts_State.touchY[0] / 20 - 1) - String_number);
-              if (str_increment > Total_tracks - 7)
-                str_increment = Total_tracks - 7;
-            } else {
-              str_increment -=
-                  abs((ts_State.touchY[0] / 20 - 1) - String_number);
-              if (str_increment < 0)
-                str_increment = 0;
-            }
-          }
-          str_offset = 0;
-          touch_count = 0;
-          String_number = -1;
-        }
-        if (ts_State.touchX[0] > 380) {
-          str_offset = 0;
-          touch_count = 0;
-          bOutOfData = 1;
-          unDmaBufMode = 3;
-          Track_number = String_number + str_increment;
-          if (Track_number >= Total_tracks)
-            Track_number = 0;
-          String_number = -1;
-        }
-      }
-      if (menu_mode == 2) {
-        touch_count = 0;
-        if ((ts_State.touchX[0] >= 40) && (ts_State.touchX[0] <= 440)) {
-          if ((ts_State.touchY[0] > 40) && (ts_State.touchY[0] < 60)) {
-            volume = 100 * (float)(ts_State.touchX[0] - 40) / 400;
-            BSP_AUDIO_OUT_SetVolume(volume);
-          }
-          if ((ts_State.touchY[0] > 80) && (ts_State.touchY[0] < 100)) {
-            jog_sensitivity = 0.01 * (float)(ts_State.touchX[0] - 40) / 400;
-          }
-          if ((ts_State.touchY[0] > 120) && (ts_State.touchY[0] < 140)) {
-            acue_sensitivity = 250 * (float)(ts_State.touchX[0] - 40) / 400;
-          }
-        }
-      }
-    } else if ((ts_State.touchY[0] > 0) && (ts_State.touchY[0] < 20)) {
-      HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
-      __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
-      __HAL_TIM_SET_COUNTER(&htim6, 0);
-      HAL_TIM_Base_Start_IT(&htim6);
-      touch_count = 0;
-      if (ts_State.touchX[0] < 200) {
-        menu_mode--;
-        if (menu_mode < 0)
-          menu_mode = 2;
-      } else if (ts_State.touchX[0] > 280) {
-        menu_mode++;
-        if (menu_mode > 2)
-          menu_mode = 0;
-      }
-    } else if ((ts_State.touchX[0] > 80) && (ts_State.touchX[0] < 280) &&
-               (ts_State.touchY[0] > 180) && (ts_State.touchY[0] < 210)) {
-      HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
-      __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
-      __HAL_TIM_SET_COUNTER(&htim6, 0);
-      HAL_TIM_Base_Start_IT(&htim6);
-      touch_count = 0;
-      if (display.timemode == 0) {
-        display.timemode = 1;
-        display.trackbarmode = 1;
-      } else {
-        display.timemode = 0;
-        display.trackbarmode = 0;
-      }
-    } else {
-      touch_count = 0;
-    }
+  if (ts_State.touchDetected > 0) {
+    pending_touch_state = ts_State;
+    touch_pending = 1;
   }
-  /*if((ts_State.touchDetected == 2) && (menu_mode == 0)) {
-          if((ts_State.touchY[0] > 75) && (ts_State.touchY[0] < 165)) {
-                  if(touch_count == 0) {
-                          touch_wide = abs(ts_State.touchX[0] -
-  ts_State.touchX[1]);
-                  }
-                  else {
-                          stretch = touch_wide/abs(ts_State.touchX[0] -
-  ts_State.touchX[1]); if(stretch < 0.0001) stretch = 0.0001; if(stretch > 4)
-  stretch = 4;
-                  }
-                  touch_count++;
-          }
-  }*/
   BSP_TS_ResetTouchData(&ts_State);
   BSP_TS_ITClear();
   /* USER CODE END EXTI15_10_IRQn 0 */

@@ -218,6 +218,9 @@ void BSP_SD_GetCardInfo(HAL_SD_CardInfoTypeDef *CardInfo)
 
 /* USER CODE BEGIN BeforeCallBacksSection */
 /* can be used to modify previous code / undefine following code / add code */
+__weak void BSP_SD_AbortCallback(void);
+__weak void BSP_SD_WriteCpltCallback(void);
+__weak void BSP_SD_ReadCpltCallback(void);
 /* USER CODE END BeforeCallBacksSection */
 /**
   * @brief SD Abort callbacks

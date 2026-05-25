@@ -12,9 +12,10 @@
 #include "display.h"
 #include "string.h"
 #include "stm32746g_discovery_audio.h"
+#include "main.h"
 #include <stdio.h>
 
-extern uint8_t lowp_wavebuffer[400];
+extern uint8_t lowp_wavebuffer[LOWP_WAVEBUFFER_SIZE];
 extern uint32_t file_pos;
 extern uint32_t file_pos_wide;
 extern RekordboxTypeDef rekordbox;
@@ -49,6 +50,14 @@ extern uint8_t inbuf[AUDIO_OUT_BUFFER_SIZE];
 extern uint8_t volume;
 extern float jog_sensitivity;
 extern uint8_t acue_sensitivity;
+
+static void DrawMenuLabel(const char *label, uint16_t Xpos, uint16_t Ypos,
+		uint32_t color, uint32_t fontcolor)
+{
+	char string[260];
+	snprintf(string, sizeof(string), "{ %.*s", 255, label);
+	DrawString(string, Xpos, Ypos, color, fontcolor);
+}
 
 // converts ARGB8888 to RGB565
 static uint16_t Color_Convertion(uint32_t in_color)
@@ -91,8 +100,7 @@ void DrawMenu()
 {
 	uint32_t backcolor = 0;
 	if(menu_mode == 0) {
-		char string[255] = " { ";
-		DrawString(strcat(string, rekordbox.file), 0, 20, 0x00FFFFFF, 0x000000FF);
+		DrawMenuLabel(rekordbox.file, 0, 20, 0x00FFFFFF, 0x000000FF);
 	}
 	else if(menu_mode == 1) {
 		if(Total_tracks > 7) {
@@ -110,27 +118,26 @@ void DrawMenu()
 		DrawString(" [FILES]", 0, 20, 0x00FFFFFF, 0x000000FF);
 		int i = 0;
 		while(21+20*(i+1) < 165) {
-			char string[255] = "{ ";
 			if(i == Track_number - str_increment) {
 				if(i == Mark_number) {
-					DrawString(strcat(string, (char*)TrackTable[i+str_increment]), 11, 21+20*(i+1), 0x00000000, 0x00FFFFFF);
+					DrawMenuLabel((char*)TrackTable[i+str_increment], 11, 21+20*(i+1), 0x00000000, 0x00FFFFFF);
 				}
 				else {
-					DrawString(strcat(string, (char*)TrackTable[i+str_increment]), 11, 21+20*(i+1), 0x00FFFFFF, 0x000000FF);
+					DrawMenuLabel((char*)TrackTable[i+str_increment], 11, 21+20*(i+1), 0x00FFFFFF, 0x000000FF);
 				}
 				backcolor += 0x00202020;
 				if(backcolor > 0x00404040) backcolor = 0;
 			}
 			else if(i == String_number) {
 				if(str_offset > 10) {
-					DrawString(strcat(string, (char*)TrackTable[i+str_increment]), 11 + str_offset, 21+20*(i+1), 0x00FFFFFF, 0x00008F00);
+					DrawMenuLabel((char*)TrackTable[i+str_increment], 11 + str_offset, 21+20*(i+1), 0x00FFFFFF, 0x00008F00);
 				}
 				else {
 					if(i == Mark_number) {
-						DrawString(strcat(string, (char*)TrackTable[i+str_increment]), 11, 21+20*(i+1), 0x00000000, 0x00FFFFFF);
+						DrawMenuLabel((char*)TrackTable[i+str_increment], 11, 21+20*(i+1), 0x00000000, 0x00FFFFFF);
 					}
 					else {
-						DrawString(strcat(string, (char*)TrackTable[i+str_increment]), 11, 21+20*(i+1), 0x00FFFFFF, backcolor);
+						DrawMenuLabel((char*)TrackTable[i+str_increment], 11, 21+20*(i+1), 0x00FFFFFF, backcolor);
 					}
 				}
 				backcolor += 0x00202020;
@@ -138,10 +145,10 @@ void DrawMenu()
 			}
 			else {
 				if(i == Mark_number) {
-					DrawString(strcat(string, (char*)TrackTable[i+str_increment]), 11, 21+20*(i+1), 0x00000000, 0x00FFFFFF);
+					DrawMenuLabel((char*)TrackTable[i+str_increment], 11, 21+20*(i+1), 0x00000000, 0x00FFFFFF);
 				}
 				else {
-					DrawString(strcat(string, (char*)TrackTable[i+str_increment]), 11, 21+20*(i+1), 0x00FFFFFF, backcolor);
+					DrawMenuLabel((char*)TrackTable[i+str_increment], 11, 21+20*(i+1), 0x00FFFFFF, backcolor);
 				}
 				backcolor += 0x00202020;
 				if(backcolor > 0x00404040) backcolor = 0;
@@ -191,7 +198,7 @@ void DrawMenu()
 void DrawLowSpectrum()
 {
 	uint32_t i, color, height;
-	for(i = 0; i < 400; i++)
+	for(i = 0; i < LOWP_WAVEBUFFER_SIZE; i++)
 	{
 		color = (uint32_t)(lowp_wavebuffer[i] & 0xE0); // read color data - first 3 bits
 		color <<= 8;

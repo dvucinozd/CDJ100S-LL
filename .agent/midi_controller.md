@@ -66,10 +66,10 @@ hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
 ### Packet Format (4 bajta)
 
 ```
-┌─────────┬─────────┬─────────┬─────────┐
-│ Byte 0  │ Byte 1  │ Byte 2  │ Byte 3  │
-│ Status  │ Command │  Data1  │  Data2  │
-└─────────┴─────────┴─────────┴─────────┘
+┌────────┬─────────┬─────────┬─────────┐
+│ Byte 0 │ Byte 1  │ Byte 2  │ Byte 3  │
+│ 0x08   │ Command │  Data1  │  Data2  │
+└────────┴─────────┴─────────┴─────────┘
 ```
 
 ### RX Buffer Analiza ([`main.c`](file:///d:/AI/CDJ100/Src/main.c))
@@ -173,20 +173,59 @@ else
 
 ### GitHub Repozitorij
 
-> ⚠️ **Napomena**: Originalni **spectran/CDJ-100S-MIDI-Adapter** repozitorij **nije dostupan** (404 greška). Možda je privatan ili obrisan.
+✅ **DOSTUPAN**: [dvucinozd/CDJ100S-LL-MIDI](https://github.com/dvucinozd/CDJ100S-LL-MIDI)
 
-### Alternative
+**Autor**: Ruslan Terentiev (spectran)
 
-Prema dokumentaciji, postoje dva moguća MIDI kontrolera:
+### Sadržaj Repozitorija
 
-1. **STM32F103C8T6** verzija (CDJ-100S-MIDI-Adapter)
-   - Blue Pill board ili custom PCB
-   - SPI Master komunikacija
-   - USB MIDI opciono
+#### 📁 Datoteke i Projekti
 
-2. **STM32F103CBT6** verzija (stm32f103-usb-midi)
-   - Veća Flash/RAM memorija
-   - USB MIDI za DAW integraciju
+| Datoteka/Folder | Opis |
+|----------------|------|
+| **STM32CubeIDE projekt** | Kompletna firmware za STM32F103C8T6 |
+| **Schematics/** | Električne sheme (.jpg, .sch format) |
+| **Connection_scheme.pdf** | Shema povezivanja sa CDJ-100S Display boardom |
+| **Sprint Layout (.lay)** | PCB layout u Sprint Layout formatu |
+| **VirtualDJ configs (.xml)** | Primjeri konfiguracija za VirtualDJ |
+| **Instructions.pdf** | Detaljna uputstva za montažu |
+
+#### 🎥 Video Demo
+[YouTube - CDJ-100S MIDI Controller](https://www.youtube.com/watch?v=wtE2o-FcW-4)
+
+### Montaža - Koraci (iz README.md)
+
+1. **Demontaža CDJ-100S**
+   - Ukloni CD drive i Main board (neće se koristiti)
+
+2. **Montaža Custom Boarda**
+   - Uklopiti u kućište CDJ-100S
+   - Preporučeno: USB jack na zadnjoj ploči
+
+3. **Napajanje**
+   - Spoji **GNDD** i **V+5V** sa Trans boarda na Custom board
+   - Spoji **GNDD** i **GNDS** na Display boardu
+
+4. **Signal Connections** (prema Connection_scheme.pdf)
+   - **V+5V, GNDD** - napajanje
+   - **JOG1-2** - jog wheel signali
+   - **S1-S5** - switch signali
+   - **KD0-2** - keyboard signali
+   - **CUE, PLAY, DISC** - LED signali
+   - **ADIN** - analog input (pitch slider)
+   - **CT** - control signal
+
+5. **⚠️ VAŽNO: Pitch Slider Voltage**
+   - **Prekini** vezu V+5V → pitch slider na Display boardu
+   - **Spoji** pitch slider +5V → **+3.3V** Custom boarda
+   - Razlog: STM32F103 ADC radi 0-3.3V (ne 0-5V!)
+
+6. **Programiranje**
+   - Program STM32F103C8T6 preko **SWD**
+   - Restart CDJ-100S
+
+7. **✅ Gotovo!**
+   - CDJ-100S je sada MIDI kontroler!
 
 ---
 

@@ -114,6 +114,7 @@ void Error_Handler(void);
 #define FILE_READ_BUFFER_SIZE 4096
 #define MP3_INBUF_SIZE 4096
 #define MP3_DMA_BUFFER_SIZE (4 * MAX_NCHAN * MAX_NGRAN * MAX_NSAMP)
+#define LOWP_WAVEBUFFER_SIZE 400
 
 #define AUDIO_OUT_BUFFER_SIZE                      4096
 #define AUDIO_IN_PCM_BUFFER_SIZE                   2*2304 /* buffer size in half-word */

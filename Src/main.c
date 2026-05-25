@@ -69,6 +69,7 @@
 #include "mp3dec.h"
 #include "mp3player.h"
 #include "rekordbox.h"
+#include "stm32f7xx_it.h"
 #include "stm32746g_discovery_audio.h"
 #include "stm32746g_discovery_ts.h"
 #include "usb_host.h"
@@ -111,7 +112,7 @@ uint16_t bytesread = 0;
 uint32_t file_pos = 0;
 uint32_t file_pos_wide = 0;
 extern volatile int32_t position;
-uint8_t lowp_wavebuffer[400];
+uint8_t lowp_wavebuffer[LOWP_WAVEBUFFER_SIZE];
 extern RekordboxTypeDef rekordbox;
 extern DisplayTypeDef display;
 uint16_t Total_tracks = 0;
@@ -254,6 +255,7 @@ int main(void) {
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
+    ProcessPendingTouch();
     find_file(Track_number);
     fr = 0;
     sec = 0;

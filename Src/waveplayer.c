@@ -110,6 +110,7 @@ void PlayWavFile() {
 		TrackTime();
 	}
 	while((!bOutOfData) && (file_pos_wide < rekordbox.spectrum_size)) {
+		ProcessPendingTouch();
 		if(file_pos_wide >= 0) {
 			if((rmin == 0) && (rsec < 30) && (rsec > 10)) {
 				if(tim7_flag == 0) {

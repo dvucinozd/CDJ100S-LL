@@ -23,7 +23,7 @@ char tag[5];
 
 RekordboxTypeDef rekordbox;
 
-extern uint8_t lowp_wavebuffer[400];
+extern uint8_t lowp_wavebuffer[LOWP_WAVEBUFFER_SIZE];
 
 extern AUDIO_OUT_BufferTypeDef  BufferCtl;
 
@@ -34,6 +34,7 @@ extern uint8_t acue_sensitivity;
 static uint8_t FindToken (char *token);
 static int32_t GetLongNumber ();
 static int32_t GetBigEndianLongNumber ();
+static uint8_t ReadLowpSpectrum(uint32_t data_size);
 
 // finds section token in the file. 0 - token is found, 1 - end of file
 static uint8_t FindToken (char *token) {
@@ -74,6 +75,27 @@ static int32_t GetBigEndianLongNumber () {
 	}
 	out_data >>= 8;
 	return out_data;
+}
+
+static uint8_t ReadLowpSpectrum(uint32_t data_size) {
+	uint32_t bytes_to_read = data_size;
+	uint32_t bytes_to_skip = 0;
+
+	memset(lowp_wavebuffer, 0, LOWP_WAVEBUFFER_SIZE);
+	if(bytes_to_read > LOWP_WAVEBUFFER_SIZE) {
+		bytes_to_skip = bytes_to_read - LOWP_WAVEBUFFER_SIZE;
+		bytes_to_read = LOWP_WAVEBUFFER_SIZE;
+	}
+
+	while(f_read(&MyFile, &lowp_wavebuffer[0], bytes_to_read, (void *)&bytesread) != FR_OK);
+	if(bytesread != bytes_to_read) return 1;
+
+	if(bytes_to_skip > 0) {
+		if(f_lseek(&MyFile, f_tell(&MyFile) + bytes_to_skip) != FR_OK) return 1;
+	}
+
+	rekordbox.lowp_spectrum_size = bytes_to_read;
+	return 0;
 }
 
 uint8_t DecodeRekordboxFiles(TCHAR *path) {
@@ -165,9 +187,9 @@ uint8_t DecodeRekordboxFiles(TCHAR *path) {
 		else rekordbox.beat_grid_offset = rekordbox.phase[0] - 1;
 		if(FindToken(wave_token) != 0) return 1;
 		while(f_read(&MyFile, BufferCtl.buff, 8, (void *)&bytesread) != FR_OK); // dummy read 8 bytes
-		rekordbox.lowp_spectrum_size = GetLongNumber();
+		data_size = GetLongNumber();
 		while(f_read(&MyFile, BufferCtl.buff, 4, (void *)&bytesread) != FR_OK); // dummy read 4 bytes
-		while(f_read(&MyFile, &lowp_wavebuffer[0], rekordbox.lowp_spectrum_size, (void *)&bytesread) != FR_OK);
+		if(ReadLowpSpectrum(data_size) != 0) return 1;
 
 		if(FindToken(cob_token) != 0) return 1;
 		while(f_read(&MyFile, BufferCtl.buff, 12, (void *)&bytesread) != FR_OK); // dummy read 12 bytes
@@ -298,9 +320,9 @@ uint8_t DecodeRekordboxFiles(TCHAR *path) {
 		else rekordbox.beat_grid_offset = rekordbox.phase[0] - 1;
 		if(FindToken(wave_token) != 0) return 1;
 		while(f_read(&MyFile, BufferCtl.buff, 8, (void *)&bytesread) != FR_OK); // dummy read 8 bytes
-		rekordbox.lowp_spectrum_size = GetLongNumber();
+		data_size = GetLongNumber();
 		while(f_read(&MyFile, BufferCtl.buff, 4, (void *)&bytesread) != FR_OK); // dummy read 4 bytes
-		while(f_read(&MyFile, &lowp_wavebuffer[0], rekordbox.lowp_spectrum_size, (void *)&bytesread) != FR_OK);
+		if(ReadLowpSpectrum(data_size) != 0) return 1;
 		if(FindToken(cob_token) != 0) return 1;
 		while(f_read(&MyFile, BufferCtl.buff, 12, (void *)&bytesread) != FR_OK); // dummy read 12 bytes
 		rekordbox.cues = GetLongNumber() + 1;
