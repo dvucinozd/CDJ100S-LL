@@ -174,13 +174,11 @@ void GoToPosition(uint32_t position) {
 	file_pos = (float)position / (float)rekordbox.spectrum_size *
 			rekordbox.lowp_spectrum_size;
 	if(BufferCtl.filetype == 0)	{
-		uint16_t i = 0;
-		do {
-			f_lseek(&MyFile, (position*(float)(f_size(&MyFile)-id3tagsize-wavtagsize)
-				/rekordbox.spectrum_size + i));
-			i++;
+		uint32_t target_pos = (uint32_t)(position * (float)(f_size(&MyFile) - id3tagsize - wavtagsize) / rekordbox.spectrum_size);
+		if (((UINT)BufferCtl.buff & 1) != (target_pos & 1)) {
+			target_pos++;
 		}
-		while(((UINT)BufferCtl.buff & 1) != (f_tell(&MyFile) & 1));
+		f_lseek(&MyFile, target_pos);
 	}
 	else {
 		f_lseek(&MyFile, (position*(float)(f_size(&MyFile)-id3tagsize-wavtagsize)
