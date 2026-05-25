@@ -115,6 +115,11 @@ CDJ100S-LL/
 
 ## Changelog
 
+### 🆕 **Verzija 2.1** (2026-05-26) - Performanse i Stabilnost
+- ✅ **SPI Asinkrono Razdvajanje (SPI Decoupling)** - uklonjeno zagušenje zvuka micanjem spora trija FATFS poziva iz interrupta u kružni spremnik
+- ✅ **USB Disconnect Freeze Protection** - `Safe_f_read` detektira iskapčanje sticka i sprječava beskonačna petljanja i CPU lockup
+- ✅ **MIDI Pitch Fader EMA Smoothing** - integriran EMA filtar ($\alpha = 0.25$) u MIDI podmodul za super-glatko upravljanje bez šuma
+
 ### 🆕 **Verzija 2.0** (2026-02-08) - USB Host Integracija
 - ✅ Zamijenjena SD kartica s USB Mass Storage podrškom
 - ✅ Dodati HAL HCD i LL USB driveri

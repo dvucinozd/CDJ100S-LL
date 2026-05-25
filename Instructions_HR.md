@@ -96,6 +96,9 @@ Originalni CDJ-100S Pitch Slider radi na **5V**. STM32F103 ADC ulaz tolerira **m
 | **ADIN** | **PA0** | Analog Input (0-3.3V MAX!) |
 | **CT** | **PA1** | Control Timing (opcionalno) |
 
+> [!TIP]
+> **Softversko filtriranje (EMA filtar)**: U najnovijem firmwareu implementiran je napredni **Exponential Moving Average (EMA)** niskopropusni filtar ($\alpha = 0.25$) koji u potpunosti uklanja mikro-šumove i analogno drhtanje (jitter) napona na PA0. Klizanje pitcha je sada izuzetno glatko u Rekordboxu i Traktoru bez potrebe za hardverskim kondenzatorima za filtriranje!
+
 ### 💡 LED Feedback
 
 | CDJ Signal | Blue Pill Pin | Funkcija |

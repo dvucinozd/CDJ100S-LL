@@ -111,46 +111,53 @@ Definisano u header datotekama (primjer iz koda):
 
 ## Implementacija - Key Handlers
 
-### Button Press Handler ([`stm32f7xx_it.c:607`](file:///d:/AI/CDJ100/Src/stm32f7xx_it.c#L607))
+### Button Press Handler (Asinkroni i Razdvojeni)
+U najnovijoj arhitekturi, **`HAL_SPI_TxRxCpltCallback`** je sveden na minimalno dodavanje primljenih paketa u kružni red spremnika kako se ne bi blokirali audio i ostali interrupti. Cjelokupna obrada switch-case naredbi za tipke i pitch fader izvršava se u asinkronoj pozadinskoj funkciji **`ProcessPendingSPIEvents()`** u petlji `while(1)` glavne aplikacije:
 
 ```c
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
-  switch (spi_rx[1] & 0xF0) {
-  case 0x90: {  // Button Press
-    switch (spi_rx[2]) {
-      case JET:
-        // Set loop start point
-        if (display.quantize == 1) {
-          display.loopstart = QuantizePosition(0);
-        } else {
-          display.loopstart = file_pos_wide;
-        }
-        break;
-        
-      case ZIP:
-        // Set loop end point
-        if (display.quantize == 1) {
-          display.loopend = QuantizePosition(0);
-        } else {
-          display.loopend = file_pos_wide;
-        }
-        if (display.loop == 0) display.loop = 1;
-        GoToPosition(display.loopstart);
-        BSP_AUDIO_OUT_Resume();
-        break;
-        
-      // ... više button handlers
+  if (spi_rx[0] != 0 || spi_rx[1] != 0 || spi_rx[2] != 0 || spi_rx[3] != 0) {
+    uint8_t next_in = (spi_event_in + 1) % SPI_EVENT_QUEUE_SIZE;
+    if (next_in != spi_event_out) {
+      spi_event_queue[spi_event_in].rx_bytes[0] = spi_rx[0];
+      spi_event_queue[spi_event_in].rx_bytes[1] = spi_rx[1];
+      spi_event_queue[spi_event_in].rx_bytes[2] = spi_rx[2];
+      spi_event_queue[spi_event_in].rx_bytes[3] = spi_rx[3];
+      spi_event_in = next_in;
     }
-    break;
   }
-  
-  case 0xB0: {  // Continuous Controller
-    // Pitch bend / Jog wheel rotation
-    uint16_t pitch_rx = spi_rx[3];
-    pitch_rx |= spi_rx[2];
-    // ... pitch handling logic
-    break;
-  }
+  for (int i = 0; i < 4; i++)
+    spi_rx[i] = 0;
+  HAL_SPI_TransmitReceive_IT(&hspi2, spi_tx, spi_rx, 4);
+}
+
+void ProcessPendingSPIEvents(void) {
+  while (spi_event_out != spi_event_in) {
+    uint8_t spi_rx_temp[4];
+    spi_rx_temp[0] = spi_event_queue[spi_event_out].rx_bytes[0];
+    spi_rx_temp[1] = spi_event_queue[spi_event_out].rx_bytes[1];
+    spi_rx_temp[2] = spi_event_queue[spi_event_out].rx_bytes[2];
+    spi_rx_temp[3] = spi_event_queue[spi_event_out].rx_bytes[3];
+    uint8_t *spi_rx = spi_rx_temp;
+
+    switch (spi_rx[1] & 0xF0) {
+      case 0x90: {  // Button Press
+        switch (spi_rx[2]) {
+          case JET:
+            // Set loop start point
+            if (display.quantize == 1) {
+              display.loopstart = QuantizePosition(0);
+            } else {
+              display.loopstart = file_pos_wide;
+            }
+            break;
+          // ... [i drugi gumbi]
+        }
+        break;
+      }
+      // ... [Pitch i ostale komande]
+    }
+    spi_event_out = (spi_event_out + 1) % SPI_EVENT_QUEUE_SIZE;
   }
 }
 ```

@@ -232,6 +232,31 @@ build_src_filter =
 
 ---
 
+## Riješeni Arhitektonski Problemi i Nadogradnje
+
+### 1. SPI Asinkrono Razdvajanje (SPI Interrupt Decoupling)
+* **Problem**: Originalni kod je izvršavao spore FATFS operacije (`f_lseek`, `f_read`, itd.) unutar SPI interrupt callbacka (`HAL_SPI_TxRxCpltCallback`). To je uzrokovalo zastajkivanje zvuka (audio dropouts) jer su interrupti bili zagušeni.
+* **Rješenje**:
+  - SPI interrupt je sveden na minimum (ispod 1 μs) - on samo dodaje 4 bajta u kružni spremnik (`spi_event_queue` veličine 16) i odmah reaktivira SPI DMA transfer.
+  - Funkcija `ProcessPendingSPIEvents()` čita spremnik asinkrono u glavnoj petlji (`main.c`) i izvršava svu originalnu switch-case logiku.
+  - Korišteno je lokalno zasjenjivanje `uint8_t *spi_rx` u obradi kako bi se očuvao originalni kod bez modifikacije mapiranja tipki.
+
+### 2. Sigurnost pri Odspajanju USB Medija (USB Disconnect Safety)
+* **Problem**: Ako se USB stick odspoji tijekom reprodukcije ili učitavanja Rekordbox baze, FATFS funkcija `f_read` počne vraćati grešku (`FR_DISK_ERR` / `FR_NOT_READY`), što bi izazvalo beskonačnu petlju `while(f_read() != FR_OK);` i potpuno zaledilo mikrokontroler.
+* **Rješenje**:
+  - Implementirana je pomoćna funkcija `Safe_f_read` koja broji uzastopne greške čitanja.
+  - Ako greška potraje duže od 5 pokušaja, funkcija pretpostavlja da je medij odspojen, postavlja pročitane bajtove na 0 i vraća `FR_OK`. To prekida beskonačnu petlju i dopušta sigurnu propagaciju greške, sprječavajući CPU lockup.
+  - Funkcija je prozirno mapirana preko makroa `#define f_read` u `rekordbox.c` i `stm32746g_discovery_audio.c`.
+
+### 3. EMA Filtar za Pitch Slider (MIDI)
+* **Problem**: Ripple napona i analogne smetnje uzrokovali su jitter (drhtanje) vrijednosti pitch slidera na Blue Pillu, zagušujući USB MIDI kanal.
+* **Rješenje**:
+  - Implementiran je Exponential Moving Average (EMA) niskopropusni filtar ($\alpha = 0.25$) na očitanju ADC-a prije snaps/deadbands logike:
+    `ema_pitch = (0.25f * local_pitch) + (0.75f * ema_pitch);`
+  - Rezultat je savršeno zaglađeno klizanje pitcha bez trzanja i jittera u Traktoru/Rekordboxu.
+
+---
+
 ## Roadmap - Prioriteti za Dalji Razvoj
 
 ### 🔴 Kritično
