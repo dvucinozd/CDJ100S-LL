@@ -208,7 +208,7 @@ static const char NRTab[6][3][4] = {
 static void UnpackSFMPEG2(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoSub *sfis, int gr, int ch, int modeExt, ScaleFactorJS *sfjs)
 {
 
-	int i, sfb, sfcIdx, btIdx, nrIdx, iipTest;
+	int i, sfb, sfcIdx, btIdx, nrIdx, iipTest, t;
 	int slen[4], nr[4];
 	int sfCompress, preFlag, intensityScale;
 	
@@ -221,16 +221,18 @@ static void UnpackSFMPEG2(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoS
 		/* in other words: if ((modeExt & 0x01) == 0 || ch == 0) */
 		if (sfCompress < 400) {
 			/* max slen = floor[(399/16) / 5] = 4 */
-			slen[0] = (sfCompress >> 4) / 5;
-			slen[1]= (sfCompress >> 4) % 5;
+			t = sfCompress >> 4;
+			slen[0] = t / 5;
+			slen[1] = t - (slen[0] * 5);
 			slen[2]= (sfCompress & 0x0f) >> 2;
 			slen[3]= (sfCompress & 0x03);
 			sfcIdx = 0;
 		} else if (sfCompress < 500) {
 			/* max slen = floor[(99/4) / 5] = 4 */
 			sfCompress -= 400;
-			slen[0] = (sfCompress >> 2) / 5;
-			slen[1]= (sfCompress >> 2) % 5;
+			t = sfCompress >> 2;
+			slen[0] = t / 5;
+			slen[1] = t - (slen[0] * 5);
 			slen[2]= (sfCompress & 0x03);
 			slen[3]= 0;
 			sfcIdx = 1;
@@ -238,7 +240,7 @@ static void UnpackSFMPEG2(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoS
 			/* max slen = floor[11/3] = 3 (sfCompress = 9 bits in MPEG2) */
 			sfCompress -= 500;
 			slen[0] = sfCompress / 3;
-			slen[1] = sfCompress % 3;
+			slen[1] = sfCompress - (slen[0] * 3);
 			slen[2] = slen[3] = 0;
 			if (sis->mixedBlock) {
 				/* adjust for long/short mix logic (see comment above in NRTab[] definition) */
@@ -255,8 +257,9 @@ static void UnpackSFMPEG2(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoS
 		if (sfCompress < 180) {
 			/* max slen = floor[35/6] = 5 (from mod 36) */
 			slen[0] = (sfCompress / 36);
-			slen[1] = (sfCompress % 36) / 6;
-			slen[2] = (sfCompress % 36) % 6;
+			t = sfCompress - (slen[0] * 36);
+			slen[1] = t / 6;
+			slen[2] = t - (slen[1] * 6);
 			slen[3] = 0;
 			sfcIdx = 3;
 		} else if (sfCompress < 244) {
@@ -271,7 +274,7 @@ static void UnpackSFMPEG2(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoS
 			/* max slen = floor[11/3] = 3 (max sfCompress >> 1 = 511/2 = 255) */
 			sfCompress -= 244;
 			slen[0] = (sfCompress / 3);
-			slen[1] = (sfCompress % 3);
+			slen[1] = sfCompress - (slen[0] * 3);
 			slen[2] = slen[3] = 0;
 			sfcIdx = 5;
 		}
